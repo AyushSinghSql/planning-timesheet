@@ -1982,7 +1982,7 @@ function App() {
             <Route
               path="rate-configure"
               element={
-                <RequirePermission screenKey="rateComputation">
+                <RequirePermission screenKey="ratecomputation">
                   <div className="mt-12 ml-2">
                     <RateConfigure />
                   </div>
