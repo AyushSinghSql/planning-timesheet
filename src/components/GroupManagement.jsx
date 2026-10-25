@@ -613,10 +613,21 @@ export default function GroupManagement({ onClose }) {
           fetch(`${backendUrl}/api/UserGroups`).catch(() => null),
         ]);
 
+        // if (usersRes.ok) {
+        //   const userData = await usersRes.json();
+        //   setUsersList(Array.isArray(userData) ? userData : []);
+        // }
+
         if (usersRes.ok) {
-          const userData = await usersRes.json();
-          setUsersList(Array.isArray(userData) ? userData : []);
-        }
+  const userData = await usersRes.json();
+  
+  // Ensure userData is an array, then filter by username
+  const filteredUsers = Array.isArray(userData)
+    ? userData.filter(user => user.username !== "Revolve")
+    : [];
+    
+  setUsersList(filteredUsers);
+}
 
         if (groupsRes && groupsRes.ok) {
           const groupData = await groupsRes.json();
