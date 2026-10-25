@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-
-const API_BASE_URL = "http://localhost:5033";
+import { backendUrl } from "./config";
 
 const initialEmployees = [
     {
@@ -114,7 +113,7 @@ export default function EmployeeMaster() {
     const fetchEmployees = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/EmployeeMaster`);
+            const response = await fetch(`${backendUrl}/api/EmployeeMaster`);
             if (!response.ok) {
                 throw new Error(`Failed to fetch employees (${response.status})`);
             }
@@ -198,7 +197,7 @@ export default function EmployeeMaster() {
 
     const totalPages = Math.max(
         1,
-        Math.ceil(filteredEmployees.length / pageSize),
+        Math.ceil(filteredEmployees.length / pageSize), 
     );
     const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
 
@@ -263,7 +262,7 @@ export default function EmployeeMaster() {
             for (const emp of toDelete) {
                 const isSaved = savedEmployees.some((s) => s.employeeId === emp.employeeId && !emp._new);
                 if (isSaved && emp.employeeId) {
-                    const res = await fetch(`${API_BASE_URL}/api/EmployeeMaster/${encodeURIComponent(emp.employeeId.trim())}`, {
+                    const res = await fetch(`${backendUrl}/api/EmployeeMaster/${encodeURIComponent(emp.employeeId.trim())}`, {
                         method: "DELETE",
                     });
                     if (!res.ok) {
@@ -368,7 +367,7 @@ export default function EmployeeMaster() {
                 const isNew = emp._new || !savedEmployees.some((s) => s.employeeId.toLowerCase() === emp.employeeId.trim().toLowerCase());
 
                 if (isNew) {
-                    const res = await fetch(`${API_BASE_URL}/api/EmployeeMaster`, {
+                    const res = await fetch(`${backendUrl}/api/EmployeeMaster`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload),
@@ -378,7 +377,7 @@ export default function EmployeeMaster() {
                         throw new Error(err.message || err.error || `Failed to create employee ${emp.employeeId}`);
                     }
                 } else {
-                    const res = await fetch(`${API_BASE_URL}/api/EmployeeMaster/${encodeURIComponent(emp.employeeId.trim())}`, {
+                    const res = await fetch(`${backendUrl}/api/EmployeeMaster/${encodeURIComponent(emp.employeeId.trim())}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload),
