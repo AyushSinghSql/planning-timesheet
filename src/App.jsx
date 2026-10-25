@@ -2183,7 +2183,7 @@ function App() {
             <Route
               path="sub-employee-master"
               element={
-                <RequirePermission screenKey="manageuser">
+                <RequirePermission screenKey="manageemployee">
                   <div className="mt-12 ml-2">
                     <EmployeeMaster />
                   </div>
@@ -2193,7 +2193,7 @@ function App() {
             <Route
               path="sub-project-user-mapping"
               element={
-                <RequirePermission screenKey="accessmapping">
+                <RequirePermission screenKey="employeeplcmapping">
                   <div className="mt-12 ml-2">
                     <ProjectUserMapping />
                   </div>

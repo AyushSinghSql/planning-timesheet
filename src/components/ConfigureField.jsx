@@ -302,6 +302,7 @@ const ConfigureField = ({
         { id: "workorder", label: "Work Order", hideEdit: true },
         { id: "report", label: "Report", hideEdit: true },
         { id: "manageproject", label: "Manage Project", hideEdit: true },
+        { id: "manageemployee", label: "Manage Employee", hideEdit: true },
         { id: "groupmanagement", label: "Group Management", hideEdit: true },
         {
           id: "userworkflowmapping",
