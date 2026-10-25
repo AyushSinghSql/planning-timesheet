@@ -630,7 +630,7 @@ const ManageUser = () => {
         username: user.username.trim(),
         fullName: user.fullName.trim(),
         email: user.email?.trim() || "",
-        role: String(roleId || ""),
+        role: String(user.role || ""),
         roleId: Number(roleId || 0),
         isActive: Boolean(user.isActive),
         firstLogin: Boolean(user.firstLogin),
