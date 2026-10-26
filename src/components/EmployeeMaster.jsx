@@ -2,62 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { backendUrl } from "./config";
 import { useOutletContext } from "react-router-dom";
 
-const initialEmployees = [
-  {
-    employeeId: "EMP-001",
-    displayedName: "Aarav Sharma",
-    lastName: "Sharma",
-    firstName: "Aarav",
-    status: "Active",
-    createDate: "2026-10-01",
-    modifiedName: "Aarav Sharma",
-    createdBy: "admin",
-    modifiedBy: "admin",
-  },
-  {
-    employeeId: "EMP-002",
-    displayedName: "Priya Patel",
-    lastName: "Patel",
-    firstName: "Priya",
-    status: "Active",
-    createDate: "2026-10-03",
-    modifiedName: "Priya Patel",
-    createdBy: "admin",
-    modifiedBy: "admin",
-  },
-  {
-    employeeId: "EMP-003",
-    displayedName: "Rohan Mehta",
-    lastName: "Mehta",
-    firstName: "Rohan",
-    status: "Inactive",
-    createDate: "2026-10-05",
-    modifiedName: "Rohan Mehta",
-    createdBy: "admin",
-    modifiedBy: "admin",
-  },
-].map((employee, index) => ({ ...employee, _rowId: `employee-${index + 1}` }));
-
-const EMPLOYEE_STORAGE_KEY = "employeeMasterData";
-
-const loadEmployees = () => {
-  try {
-    const storedEmployees = localStorage.getItem(EMPLOYEE_STORAGE_KEY);
-
-    if (storedEmployees !== null) {
-      const parsedEmployees = JSON.parse(storedEmployees);
-
-      if (Array.isArray(parsedEmployees)) {
-        return parsedEmployees;
-      }
-    }
-  } catch (error) {
-    console.error("Failed to load employees:", error);
-  }
-
-  return initialEmployees.map((employee) => ({ ...employee }));
-};
-
 const columns = [
   { key: "employeeId", label: "Employee ID" },
   { key: "displayedName", label: "Displayed Name" },
@@ -85,6 +29,120 @@ const makeBlankEmployee = () => ({
   modifiedBy: "",
   _new: true,
 });
+
+const parseEmployeeStatus = (item) => {
+  if (!item) return "Active";
+
+  // 1. Check boolean or numeric flags (e.g. isActive, active)
+  const activeFlag =
+    item.isActive ?? item.IsActive ?? item.active ?? item.Active;
+  if (
+    activeFlag === false ||
+    activeFlag === 0 ||
+    activeFlag === "false" ||
+    activeFlag === "0"
+  ) {
+    return "Inactive";
+  }
+
+  // 2. Extract raw status value from possible backend fields
+  const raw =
+    item.status ??
+    item.Status ??
+    item.emplStatus ??
+    item.EmplStatus ??
+    item.employeeStatus ??
+    item.EmployeeStatus ??
+    item.statusCode ??
+    item.StatusCode ??
+    "";
+
+  if (raw === false || raw === 0) {
+    return "Inactive";
+  }
+
+  const s = String(raw).trim().toUpperCase();
+
+  // 3. Match any inactive representations
+  if (
+    s === "IN" ||
+    s === "INA" ||
+    s === "INACT" ||
+    s === "INACTIVE" ||
+    s === "I" ||
+    s === "TER" ||
+    s === "TERM" ||
+    s === "TERMINATED" ||
+    s === "T" ||
+    s === "N" ||
+    s === "NO" ||
+    s === "FALSE" ||
+    s === "0" ||
+    s === "DIS" ||
+    s === "DISABLED" ||
+    s === "DEACTIVE" ||
+    s === "DEACTIVATED" ||
+    s.startsWith("IN")
+  ) {
+    return "Inactive";
+  }
+
+  return "Active";
+};
+
+const formatDateForInput = (val) => {
+  if (!val) return "";
+  const str = String(val).trim();
+  if (!str) return "";
+
+  // 1. If already YYYY-MM-DD or starts with YYYY-MM-DD (e.g. ISO format YYYY-MM-DDTHH:mm:ss)
+  const isoMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (isoMatch) {
+    const y = isoMatch[1];
+    const m = isoMatch[2].padStart(2, "0");
+    const d = isoMatch[3].padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  // 2. Check DD/MM/YYYY, MM/DD/YYYY, DD-MM-YYYY, MM-DD-YYYY
+  const dmyMatch = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (dmyMatch) {
+    const p1 = parseInt(dmyMatch[1], 10);
+    const p2 = parseInt(dmyMatch[2], 10);
+    const year = dmyMatch[3];
+
+    let month, day;
+    if (p1 > 12) {
+      day = String(p1).padStart(2, "0");
+      month = String(p2).padStart(2, "0");
+    } else if (p2 > 12) {
+      month = String(p1).padStart(2, "0");
+      day = String(p2).padStart(2, "0");
+    } else {
+      const parsed = new Date(str);
+      if (!isNaN(parsed.getTime())) {
+        const y = parsed.getFullYear();
+        const m = String(parsed.getMonth() + 1).padStart(2, "0");
+        const d = String(parsed.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      month = String(p1).padStart(2, "0");
+      day = String(p2).padStart(2, "0");
+    }
+    return `${year}-${month}-${day}`;
+  }
+
+  // 3. Fallback to native Date parser (handles "26 Oct 2026", "October 26, 2026", etc.)
+  const parsed = new Date(str);
+  if (!isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, "0");
+    const d = String(parsed.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  return str;
+};
 
 export default function EmployeeMaster() {
   const [employees, setEmployees] = useState([]);
@@ -138,23 +196,19 @@ export default function EmployeeMaster() {
       }
       const data = await response.json();
       const loaded = (Array.isArray(data) ? data : []).map((item, index) => {
-        const statusRaw = String(item.status || "ACT")
-          .trim()
-          .toUpperCase();
-        const isInactive =
-          statusRaw === "INA" ||
-          statusRaw === "INACTIVE" ||
-          statusRaw === "TER";
+        const empId = item.employeeId || item.emplId || item.id || "";
         return {
-          _rowId: `employee-${item.employeeId || index + 1}`,
-          employeeId: item.employeeId || "",
-          displayedName: item.displayedName || "",
-          lastName: item.lastName || "",
-          firstName: item.firstName || "",
-          status: isInactive ? "Inactive" : "Active",
-          createDate: item.createdDate
-            ? String(item.createdDate).split("T")[0]
-            : "",
+          _rowId: `employee-${empId || index + 1}`,
+          employeeId: empId,
+          displayedName:
+            item.displayedName || item.displayedname || item.name || "",
+          lastName: item.lastName || item.lastname || "",
+          firstName: item.firstName || item.firstname || "",
+          status: parseEmployeeStatus(item),
+          createDate:
+            item.createdDate || item.createDate
+              ? String(item.createdDate || item.createDate).split("T")[0]
+              : "",
           modifiedName:
             item.supervisorName || item.supervisor || item.modifiedName || "",
           createdBy: item.createdBy || "",
@@ -162,7 +216,6 @@ export default function EmployeeMaster() {
             ? String(item.modifiedDate).split("T")[0]
             : "",
           modifiedBy: item.modifiedBy || "",
-
           _new: false,
         };
       });
@@ -172,9 +225,8 @@ export default function EmployeeMaster() {
       setEditingId(null);
     } catch (err) {
       console.error("Error loading employees from API:", err);
-      const fallback = loadEmployees();
-      setEmployees(fallback);
-      setSavedEmployees(fallback.map((e) => ({ ...e })));
+      setEmployees([]);
+      setSavedEmployees([]);
     } finally {
       setLoading(false);
     }
@@ -568,15 +620,15 @@ export default function EmployeeMaster() {
           displayedName: emp.displayedName?.trim() || null,
           firstName: emp.firstName?.trim() || null,
           lastName: emp.lastName?.trim() || null,
-          status: emp.status === "Active" ? "ACT" : "INA",
+          status: emp.status === "Active" ? "ACT" : "IN",
           supervisorName: emp.modifiedName?.trim() || null,
           supervisor: emp.modifiedName?.trim() || null,
           createdBy: isNew
             ? userName || "admin"
             : existingSaved?.createdBy || emp.createdBy?.trim() || "admin",
-          createDate: isNew
-            ? todayIso
-            : existingSaved?.createDate || emp.createDate || todayIso,
+          createDate:
+            emp.createDate?.trim() ||
+            (isNew ? todayIso : existingSaved?.createDate || todayIso),
           modifiedBy: userName || "admin",
           modifiedDate: todayIso,
         };
@@ -781,13 +833,59 @@ export default function EmployeeMaster() {
       );
       const imported = [];
 
+      const COLUMN_ALIASES = {
+        employeeId: ["employeeid", "emplid", "empid", "id"],
+        displayedName: [
+          "displayedname",
+          "displayname",
+          "name",
+          "fullname",
+          "employeename",
+        ],
+        firstName: ["firstname", "fname", "first"],
+        lastName: ["lastname", "lname", "last"],
+        status: ["status", "employeestatus", "emplstatus", "isactive", "state"],
+        createDate: [
+          "createdate",
+          "createddate",
+          "creationdate",
+          "datecreated",
+          "createdon",
+          "createdat",
+        ],
+        createdBy: ["createdby", "creator", "createduser"],
+        modifiedDate: [
+          "modifieddate",
+          "modifydate",
+          "updateddate",
+          "updatedat",
+          "modifiedon",
+        ],
+        modifiedBy: ["modifiedby", "modifier", "updatedby"],
+        modifiedName: ["modifiedname", "supervisorname", "supervisor"],
+      };
+
       lines.slice(1).forEach((line, index) => {
         const values = parseCSVLine(line);
         const employee = {};
         columns.forEach((column) => {
-          const headerIndex = headers.indexOf(normalize(column.label));
-          employee[column.key] =
-            headerIndex >= 0 ? values[headerIndex] || "" : "";
+          const labelNorm = normalize(column.label);
+          const keyNorm = normalize(column.key);
+          const aliases = COLUMN_ALIASES[column.key] || [labelNorm, keyNorm];
+
+          let headerIndex = headers.indexOf(labelNorm);
+          if (headerIndex === -1) {
+            headerIndex = headers.indexOf(keyNorm);
+          }
+          if (headerIndex === -1) {
+            headerIndex = headers.findIndex((h) => aliases.includes(h));
+          }
+
+          let val = headerIndex >= 0 ? (values[headerIndex] || "").trim() : "";
+          if (column.key === "createDate" || column.key === "modifiedDate") {
+            val = formatDateForInput(val);
+          }
+          employee[column.key] = val;
         });
         const employeeId = String(employee.employeeId || "").trim();
         if (
@@ -798,6 +896,7 @@ export default function EmployeeMaster() {
         if (employeeId) existingIds.add(employeeId.toLowerCase());
         imported.push({
           ...employee,
+          status: parseEmployeeStatus(employee),
           _rowId: `employee-import-${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`,
           _new: true,
         });
