@@ -2135,7 +2135,7 @@ const NavigationSidebar = ({
                       onClick={handleLinkClick}
                       searchTerm={searchTerm}
                     />
-                    {(currentUserRole?.toUpperCase() === "ADMIN" || currentUserRole?.toUpperCase() === "SUPERVISOR") && <NavItem
+                    {(currentUserRole?.toUpperCase() === "ADMIN" || currentUserRole?.toUpperCase() === "SUPERVISOR" || currentUserRole?.toUpperCase() === "PROJECT MANAGER") && <NavItem
                       label="Enquiry & Approval"
                       path="/dashboard/sub-enquiry-approval"
                       selected={selectedPage}
@@ -2184,7 +2184,7 @@ const NavigationSidebar = ({
                       onClick={handleLinkClick}
                       searchTerm={searchTerm}
                     /> */}
-                    {(currentUserRole?.toUpperCase() === "ADMIN" || currentUserRole?.toUpperCase() === "SUPERVISOR") && <><NavItem
+                    {(currentUserRole?.toUpperCase() === "ADMIN") && <><NavItem
                       label="Manage Project"
                       path="/dashboard/sub-project-master"
                       selected={selectedPage}
