@@ -726,7 +726,7 @@ export default function TimesheetLine({
         let poEntry = null;
 
         // Only look up PO data if the role is NOT user
-        if (role !== "user" && purchaseOrderData.length > 0) {
+        if (role === "fbsdusbcsdnjsbhasbx" && purchaseOrderData.length > 0) {
           poEntry = purchaseOrderData.find((po) =>
             po.project?.includes(timesheetToEdit.projId),
           );
@@ -1316,7 +1316,7 @@ export default function TimesheetLine({
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    if (role !== "user") {
+    if (role === "fbsdusbcsdnjsbhasbx") {
       for (const line of lines) {
         if (!line.project || !line.poLineNumber) {
           showToast(`Please complete the Work Order for all lines.`, "warning");
@@ -1376,7 +1376,7 @@ export default function TimesheetLine({
           pm_User_Id: line.pmUserID,
           PayType: line.payType,
           // PoNumber: line.poNumber,
-          PoNumber: role !== "fbsdusbcsdnjsbhasbx" ? "0000" : line.poNumber,
+          PoNumber: role === "fbsdusbcsdnjsbhasbx" ? line.poNumber : "0000",
           RlseNumber: line.rlseNumber || "0",
           Resource_Id: String(resourceId),
           PoLineNumber: parseInt(line.poLineNumber, 10) || 0,
