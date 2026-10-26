@@ -1222,7 +1222,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { backendUrl } from "./config";
-import logo from "../assets/Fed_Axis_Logo_v2_nobk.png";
+import logo from "../assets/CapComm_Logo_v2_nobk.png";
 import fedaxis from "../assets/fed_axis_login_image.png";
 import axios from "axios";
 
