@@ -1441,7 +1441,7 @@ export default function MainTable() {
         ? data.map((item) => ({
             leaveTypeCode: item.leave_code || "",
             // leaveTypeName: item.leave_type_name || item.leave_code, // fallback if name isn't provided
-            // beginningBalance: item.beginning_balance || 0,
+            begining_hours: item.begining_hours || 0,
             // carriedForward: item.carried_forward || 0,
             // beginningAdjustments: item.beginning_adjustments || 0,
             accruedHours: item.accrued_hours || 0,
@@ -1792,11 +1792,11 @@ export default function MainTable() {
                           <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
                             Leave Code
                           </th>
-                          {/* <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-left">
-                            Leave Type Name
-                          </th>
                           <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
                             Beginning Balance
+                          </th>
+                          {/*  <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
+                            Leave Type Name
                           </th>
                           <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
                             Carried Forward
@@ -1827,12 +1827,13 @@ export default function MainTable() {
                               <td className="px-3 py-2 text-center border-r border-b border-gray-300 font-bold text-blue-700">
                                 {item.leaveTypeCode}
                               </td>
+                              <td className="px-3 py-2 text-center border-r border-b border-gray-300">
+                                {item.begining_hours}
+                              </td>
                               {/* <td className="px-3 py-2 text-left border-r border-b border-gray-300 font-medium text-gray-800">
                                 {item.leaveTypeName}
                               </td>
-                              <td className="px-3 py-2 text-center border-r border-b border-gray-300">
-                                {item.beginningBalance}
-                              </td>
+                             
                               <td className="px-3 py-2 text-center border-r border-b border-gray-300">
                                 {item.carriedForward}
                               </td>

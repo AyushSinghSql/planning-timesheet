@@ -757,6 +757,20 @@ export default function ProjectUserMapping({ onClose }) {
       return;
     }
 
+    // for (const employeeId of selectedEmployeeIds) {
+    //   const plc = employeePlcMap[employeeId];
+    //   if (!plc || !String(plc).trim()) {
+    //     const emp = employeesList.find(
+    //       (e) => String(e.employeeId) === String(employeeId),
+    //     );
+    //     const empName = emp
+    //       ? emp.displayedName || `${emp.lastName}, ${emp.firstName}`
+    //       : employeeId;
+    //     toast.warn(`PLC is required for employee: ${empName}`);
+    //     return;
+    //   }
+    // }
+
     try {
       setLoading(true);
       const nowIso = new Date().toISOString();

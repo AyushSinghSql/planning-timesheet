@@ -1546,8 +1546,8 @@ function App() {
               Access Denied
             </h2>
             <p className="text-sm text-gray-600">
-              You do not have permission to view this screen (
-              <span className="font-mono font-semibold">{screenKey}</span>).
+              You do not have permission to view this screen 
+              {/* (<span className="font-mono font-semibold">{screenKey}</span>). */}
               Please contact your administrator if you believe this is an error.
             </p>
           </div>
