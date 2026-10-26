@@ -1630,6 +1630,10 @@ export default function MainTable() {
                     value={selectedEmployeeId}
                     onChange={(e) => {
                       const selectedVal = e.target.value;
+
+                      if(selectedEmployeeId !== selectedVal){
+                        setSelectedTimesheetData(false)
+                      }
                       setSelectedEmployeeId(selectedVal);
 
                       // Find the corresponding option to extract its role
