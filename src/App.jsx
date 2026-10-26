@@ -1479,6 +1479,7 @@ import ProjectMaster from "./components/ProjectMaster";
 import EmployeeMaster from "./components/EmployeeMaster";
 import ProjectUserMapping from "./components/ProjectUserMapping";
 import ApprovalEnquiry from "./components/ApprovalEnquiry";
+import LeaveProjectMapping from "./components/LeaveProjectMapping";
 
 function App() {
   const getCurrentUserContext = () => {
@@ -2338,6 +2339,14 @@ function App() {
                     <GroupManagement />
                   </div>
                 </RequirePermission>
+              }
+            />
+            <Route
+              path="leave-project-mapping"
+              element={
+                  <div className="mt-12 ml-2">
+                    <LeaveProjectMapping />
+                  </div>
               }
             />
             <Route
