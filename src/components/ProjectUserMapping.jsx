@@ -854,7 +854,10 @@ export default function ProjectUserMapping({ onClose }) {
         items,
       };
 
-      await axios.post(`${backendUrl}/api/ProjEmployeeLabcat/replace`, payload);
+      await axios.put(
+        `${backendUrl}/api/ProjEmployeeLabcat/ReplaceProjectMappings`,
+        payload,
+      );
       toast.success("Project, Employee & PLC mapping updated successfully.");
 
       const res = await axios
