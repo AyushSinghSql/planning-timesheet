@@ -384,10 +384,23 @@ export default function TimesheetDetailModal({
   console.log(timesheetData?.status);
 
   // Define hideable columns conditionally based on the role
+  // const hideableColumns =
+  //   role === "user"
+  //     ? ["Project", "PLC", "Pay Type"]
+  //     : [
+  //         "Work Order",
+  //         "Description",
+  //         "Project",
+  //         "PLC",
+  //         "Pay Type",
+  //         "PO Number",
+  //         "RLSE Number",
+  //         "PO Line Number",
+  //         "PO Remaining Hours",
+  //       ];
   const hideableColumns =
-    role === "user"
-      ? ["Project", "PLC", "Pay Type"]
-      : [
+    role === "fbsdusbcsdnjsbhasbx"
+      ? [
           "Work Order",
           "Description",
           "Project",
@@ -397,7 +410,8 @@ export default function TimesheetDetailModal({
           "RLSE Number",
           "PO Line Number",
           "PO Remaining Hours",
-        ];
+        ]
+      : ["Project", "PLC", "Pay Type"];
 
   const [hiddenColumns, setHiddenColumns] = useState(() => {
     const initial = {};
@@ -450,7 +464,7 @@ export default function TimesheetDetailModal({
   }, []); // 1. Fetch Config (Updated)
 
   useEffect(() => {
-    if (role === "user") {
+    if (role !== "fbsdusbcsdnjsbhasbx") {
       const fetchEmployeeProjects = async () => {
         try {
           const response = await fetch(
@@ -2088,7 +2102,7 @@ export default function TimesheetDetailModal({
                   {hideableColumns.includes("Project") &&
                     !hiddenColumns["Project"] && (
                       <td className="p-1 border-r border-b border-gray-300 min-w-[150px]">
-                        {role === "user" ? (
+                        {role !== "fbsdusbcsdnjsbhasbx" ? (
                           <select
                             value={line.project}
                             onChange={(e) => {

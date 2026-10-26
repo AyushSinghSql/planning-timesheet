@@ -381,10 +381,23 @@ export default function TimesheetLine({
   // const role = currentUser?.role?.toLowerCase(); // Default role, can be dynamically set based on user context
 
   // Define hideable columns conditionally based on the role
+  // const hideableColumns =
+  //   role === "user"
+  //     ? ["Project", "PLC", "Pay Type"]
+  //     : [
+  //         "Work Order",
+  //         "Description",
+  //         "Project",
+  //         "PLC",
+  //         "Pay Type",
+  //         "PO Number",
+  //         "RLSE Number",
+  //         "PO Line Number",
+  //         "PO Remaining Hours",
+  //       ];
   const hideableColumns =
-    role === "user"
-      ? ["Project", "PLC", "Pay Type"]
-      : [
+    role === "fbsdusbcsdnjsbhasbx"
+      ? [
           "Work Order",
           "Description",
           "Project",
@@ -394,7 +407,8 @@ export default function TimesheetLine({
           "RLSE Number",
           "PO Line Number",
           "PO Remaining Hours",
-        ];
+        ]
+      : ["Project", "PLC", "Pay Type"];
 
   const [hiddenColumns, setHiddenColumns] = useState(() => {
     const initial = {};
@@ -427,7 +441,7 @@ export default function TimesheetLine({
   }, []);
 
   useEffect(() => {
-    if (role === "user") {
+    if (role !== "fbsdusbcsdnjsbhasbx") {
       const fetchEmployeeProjects = async () => {
         try {
           const response = await fetch(
@@ -1280,7 +1294,7 @@ export default function TimesheetLine({
   };
 
   const handleSubmit = async () => {
-    console.log(lines)
+    console.log(lines);
     if (isPeriodInvalid) {
       showToast("The selected period already has a timesheet.", "warning");
       return;
@@ -1362,7 +1376,7 @@ export default function TimesheetLine({
           pm_User_Id: line.pmUserID,
           PayType: line.payType,
           // PoNumber: line.poNumber,
-          PoNumber: role === "user" ? "0000" : line.poNumber,
+          PoNumber: role !== "fbsdusbcsdnjsbhasbx" ? "0000" : line.poNumber,
           RlseNumber: line.rlseNumber || "0",
           Resource_Id: String(resourceId),
           PoLineNumber: parseInt(line.poLineNumber, 10) || 0,
@@ -1663,7 +1677,7 @@ export default function TimesheetLine({
                   {hideableColumns.includes("Project") &&
                     !hiddenColumns["Project"] && (
                       <td className="p-1 border-r border-b border-gray-300 min-w-[150px]">
-                        {role === "user" ? (
+                        {role !== "fbsdusbcsdnjsbhasbx" ? (
                           <select
                             value={`${line.project}:::${line.plc}`}
                             onChange={(e) => {
