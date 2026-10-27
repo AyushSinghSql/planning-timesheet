@@ -859,12 +859,19 @@ export default function MainTable() {
           ? userRes.data.members
           : [];
 
+        // Filter active employees based on sEmplStatusCd === "ACT"
+        const activeMembers = membersData.filter(
+          (u) => u.ts_Schl_id?.sEmplStatusCd === "ACT",
+        );
+
         setUserOptions(
-          membersData.map((u) => ({
-            value: u.username, // maps to the employee resource identifier (e.g. "10001" or "000002")
+          activeMembers.map((u) => ({
+            value: u.username,
             label: `${u.fullName} (${u.username}) - ${u.groupName}`,
-            role: u.role, // mapping groupName or relevant role context
-            userId: u.userId, // maps to userId (e.g. 59, 58)
+            role: u.role,
+            userId: u.userId,
+            scheduleId: u.ts_Schl_id?.ts_Schedule_Id,
+            statusCd: u.ts_Schl_id?.sEmplStatusCd,
           })),
         );
       } catch (e) {
@@ -962,9 +969,6 @@ export default function MainTable() {
     if (userInfo) {
       try {
         setCurrentUser(JSON.parse(userInfo));
-        // if (parsed?.scheduleId) {
-        //   setSelectedScheduleId(parsed.scheduleId);
-        // }
       } catch {
         navigate("/");
       }
@@ -1723,10 +1727,10 @@ export default function MainTable() {
                       );
                       if (matchedOpt) {
                         setSelectedRole(matchedOpt.role);
-                        // setSelectedScheduleId(matchedOpt.scheduleId);
+                        setSelectedScheduleId(matchedOpt.scheduleId);
                       } else {
                         setSelectedRole("");
-                        // setSelectedScheduleId(null);
+                        setSelectedScheduleId(null);
                       }
                     }}
                     disabled={employeeLoading}
@@ -2107,8 +2111,7 @@ export default function MainTable() {
                 // userId={currentUser?.userId}
                 resourceId={selectedEmployeeId || currentUser?.name} // <-- Updated here
                 userId={selectedEmployeeId || currentUser?.userId}
-                // scheduleId={selectedScheduleId || currentUser?.scheduleId}
-                scheduleId={1}
+                scheduleId={selectedScheduleId || currentUser?.ts_Sch_Id}
                 role={
                   selectedRole?.toLocaleLowerCase() ||
                   currentUser?.role?.toLowerCase()
@@ -2130,8 +2133,7 @@ export default function MainTable() {
                 currentUser={currentUser}
                 resourceId={selectedEmployeeId || currentUser?.name}
                 userId={selectedEmployeeId || currentUser?.name}
-                // scheduleId={selectedScheduleId || currentUser?.scheduleId}
-                scheduleId= {1}
+                scheduleId={selectedScheduleId || currentUser?.ts_Sch_Id}
                 role={
                   selectedRole?.toLocaleLowerCase() ||
                   currentUser?.role?.toLowerCase()
