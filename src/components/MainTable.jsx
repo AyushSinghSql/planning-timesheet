@@ -784,7 +784,6 @@ export default function MainTable() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
-
   // Leave Application View inside Modal
   const [isApplyingLeave, setIsApplyingLeave] = useState(false);
   const [leaveTypes, setLeaveTypes] = useState([]);
@@ -859,8 +858,10 @@ export default function MainTable() {
           ? userRes.data.members
           : [];
 
-        // Filter active employees using the correct "isActive" boolean property
-        const activeMembers = membersData.filter((u) => u.isActive === true);
+        // Filter active employees based on sEmplStatusCd === "ACT"
+        const activeMembers = membersData.filter(
+          (u) => u.ts_Schl_id?.sEmplStatusCd === "ACT",
+        );
 
         setUserOptions(
           activeMembers.map((u) => ({
@@ -868,8 +869,8 @@ export default function MainTable() {
             label: `${u.fullName} (${u.username}) - ${u.groupName}`,
             role: u.role,
             userId: u.userId,
-            scheduleId: u.ts_Schl_id,
-            isActive: u.isActive,
+            scheduleId: u.ts_Schl_id?.ts_Schedule_Id,
+            statusCd: u.ts_Schl_id?.sEmplStatusCd,
           })),
         );
       } catch (e) {
@@ -1719,7 +1720,7 @@ export default function MainTable() {
                       }
                       setSelectedEmployeeId(selectedVal);
 
-                      // Find the corresponding option to extract its role
+                      // Find the corresponding option to extract role and scheduleId
                       const matchedOpt = userOptions.find(
                         (o) => o.value === selectedVal,
                       );
@@ -1733,7 +1734,7 @@ export default function MainTable() {
                     }}
                     disabled={employeeLoading}
                   >
-                    <option value="">Select employee...</option>
+                    <option value="">Select Employee</option>
                     {userOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
@@ -2109,7 +2110,7 @@ export default function MainTable() {
                 // userId={currentUser?.userId}
                 resourceId={selectedEmployeeId || currentUser?.name} // <-- Updated here
                 userId={selectedEmployeeId || currentUser?.userId}
-                scheduleId={selectedScheduleId || currentUser?.ts_Sch_Id}
+                scheduleId={selectedScheduleId || currentUser?.ts_Sch_Id || 1}
                 role={
                   selectedRole?.toLocaleLowerCase() ||
                   currentUser?.role?.toLowerCase()
@@ -2131,7 +2132,7 @@ export default function MainTable() {
                 currentUser={currentUser}
                 resourceId={selectedEmployeeId || currentUser?.name}
                 userId={selectedEmployeeId || currentUser?.name}
-                scheduleId={selectedScheduleId || currentUser?.ts_Sch_Id}
+                scheduleId={selectedScheduleId || currentUser?.ts_Sch_Id || 1}
                 role={
                   selectedRole?.toLocaleLowerCase() ||
                   currentUser?.role?.toLowerCase()

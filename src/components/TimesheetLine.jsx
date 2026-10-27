@@ -2534,7 +2534,7 @@ const ActionButton = ({
   );
 };
 
-const showToast = (message, type = "info", duration = 3000) => {
+const showToast = (message, type = "info", duration = 5000) => {
   const toast = document.createElement("div");
   const typeClasses = {
     success: "bg-green-500",
@@ -3481,7 +3481,8 @@ export default function TimesheetLine({
         if (newColumnTotal > maxDailyHours) {
           exceedsMaxDailyHours = true;
           isValid = false;
-          const maxDailyError = `Daily total (${newColumnTotal.toFixed(1)} hrs) exceeds the maximum limit of ${maxDailyHours} hours.`;
+          // const maxDailyError = `Daily total (${newColumnTotal.toFixed(1)} hrs) exceeds the maximum limit of ${maxDailyHours} hours.`;
+          const maxDailyError = `Daily total (${newColumnTotal.toFixed(1)} hrs) exceeds the maximum limit of ${maxDailyHours} hours. Please add a new line with the OT pay type for the excess hours.`;
           toastMessage = exceedsPoRemaining
             ? `${toastMessage} | ${maxDailyError}`
             : maxDailyError;
@@ -4224,6 +4225,7 @@ export default function TimesheetLine({
                       const columnDate = d;
                       const isFutureDate =
                         columnDate.getTime() > today.getTime();
+
                       const isDisabled = isPeriodInvalid || isFutureDate;
                       const cellKey = `${line.id}-${dayIndex}`;
                       const isExceeded = maxHoursExceededCells.has(cellKey);
