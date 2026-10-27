@@ -1610,6 +1610,21 @@ export default function MainTable() {
                       disabled
                     />
                   </div>
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor="employeeId"
+                      className="font-semibold text-xs sm:text-sm whitespace-nowrap text-gray-700"
+                    >
+                      Employee Name:
+                    </label>
+                    <input
+                      id="employeeId"
+                      type="text"
+                      value={currentUser?.fullName || ""}
+                      className="border border-gray-300 rounded px-2.5 py-1.5 text-xs bg-gray-100 text-gray-700 cursor-not-allowed shadow-inner min-w-[120px]"
+                      disabled
+                    />
+                  </div>
                 </div>
               </fieldset>
             </div>
@@ -1631,8 +1646,8 @@ export default function MainTable() {
                     onChange={(e) => {
                       const selectedVal = e.target.value;
 
-                      if(selectedEmployeeId !== selectedVal){
-                        setSelectedTimesheetData(false)
+                      if (selectedEmployeeId !== selectedVal) {
+                        setSelectedTimesheetData(false);
                       }
                       setSelectedEmployeeId(selectedVal);
 
