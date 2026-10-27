@@ -2343,13 +2343,13 @@ const NavigationSidebar = ({
 
                 {(adminSetingOpen || searchTerm) && isExpanded && (
                   <div className="ml-12 mr-4 space-y-1 border-l border-gray-100 pl-2">
-                    <NavItem
+                    {/* <NavItem
                       label="Manage Groups"
                       path="/dashboard/manage-groups"
                       selected={selectedPage}
                       onClick={handleLinkClick}
                       searchTerm={searchTerm}
-                    />
+                    /> */}
                     <NavItem
                       label="Manage Users"
                       path="/dashboard/manage-users"
