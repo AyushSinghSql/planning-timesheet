@@ -858,6 +858,45 @@ export default function MainTable() {
     fetchBaseData();
   }, [Id]);
 
+  useEffect(() => {
+    const fetchBaseData = async () => {
+      if (!currentUser?.userId) return;
+ 
+      try {
+        setEmployeeLoading(true);
+        const userRes = await axios.get(
+          `${backendUrl}/api/UserGroups/SupervisorMembers/${Id}`,
+        );
+ 
+        const rawMembers = Array.isArray(userRes.data?.members)
+          ? userRes.data.members
+          : [];
+ 
+        // Filter out inactive users where isActive is false or status is "IN"
+        const membersData = rawMembers.filter((u) => {
+          const statusVal = String(u.status || "").toUpperCase();
+          const isActiveVal = u.isActive;
+          return statusVal !== "IN" && isActiveVal !== false;
+        });
+ 
+        setUserOptions(
+          membersData.map((u) => ({
+            value: u.username,
+            label: `${u.fullName} (${u.username}) - ${u.groupName}`,
+            role: u.role,
+            userId: u.userId,
+          })),
+        );
+      } catch (e) {
+        console.error("Base data fetch failed", e);
+      } finally {
+        setEmployeeLoading(false);
+      }
+    };
+    fetchBaseData();
+  }, [Id]);
+ 
+
   // useEffect(() => {
   //   const fetchBaseData = async () => {
   //     try {
