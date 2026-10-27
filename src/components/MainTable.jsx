@@ -784,6 +784,25 @@ export default function MainTable() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
 
+  // Leave Application View inside Modal
+  const [isApplyingLeave, setIsApplyingLeave] = useState(false);
+  const [leaveTypes, setLeaveTypes] = useState([]);
+  const [selectedLeaveCode, setSelectedLeaveCode] = useState("");
+  const [leaveStartDate, setLeaveStartDate] = useState(null);
+  const [leaveEndDate, setLeaveEndDate] = useState(null);
+  const [leaveReason, setLeaveReason] = useState("");
+  const [dailyHours, setDailyHours] = useState();
+  const [isSubmittingLeave, setIsSubmittingLeave] = useState(false);
+
+  const totalHoursCalculated = React.useMemo(() => {
+    if (!leaveStartDate || !leaveEndDate) return "8.00";
+    const diffTime = leaveEndDate.getTime() - leaveStartDate.getTime();
+    if (diffTime < 0) return "0.00";
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const hours = diffDays * (parseFloat(dailyHours) || 8.0);
+    return hours.toFixed(2);
+  }, [leaveStartDate, leaveEndDate, dailyHours]);
+
   const userRole = currentUser?.role?.toLowerCase();
   const Id = currentUser?.userId;
   console.log(userRole);
@@ -857,45 +876,6 @@ export default function MainTable() {
     };
     fetchBaseData();
   }, [Id]);
-
-  useEffect(() => {
-    const fetchBaseData = async () => {
-      if (!currentUser?.userId) return;
- 
-      try {
-        setEmployeeLoading(true);
-        const userRes = await axios.get(
-          `${backendUrl}/api/UserGroups/SupervisorMembers/${Id}`,
-        );
- 
-        const rawMembers = Array.isArray(userRes.data?.members)
-          ? userRes.data.members
-          : [];
- 
-        // Filter out inactive users where isActive is false or status is "IN"
-        const membersData = rawMembers.filter((u) => {
-          const statusVal = String(u.status || "").toUpperCase();
-          const isActiveVal = u.isActive;
-          return statusVal !== "IN" && isActiveVal !== false;
-        });
- 
-        setUserOptions(
-          membersData.map((u) => ({
-            value: u.username,
-            label: `${u.fullName} (${u.username}) - ${u.groupName}`,
-            role: u.role,
-            userId: u.userId,
-          })),
-        );
-      } catch (e) {
-        console.error("Base data fetch failed", e);
-      } finally {
-        setEmployeeLoading(false);
-      }
-    };
-    fetchBaseData();
-  }, [Id]);
- 
 
   // useEffect(() => {
   //   const fetchBaseData = async () => {
@@ -1270,6 +1250,50 @@ export default function MainTable() {
     setCurrentSelectedRowId(rowData.id);
   };
 
+  const handleApplyLeaveSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedLeaveCode) {
+      showToast("Please select a leave type.", "warning");
+      return;
+    }
+    if (!leaveStartDate || !leaveEndDate) {
+      showToast("Please select a date range.", "warning");
+      return;
+    }
+    if (leaveStartDate > leaveEndDate) {
+      showToast("Start date cannot be after end date.", "warning");
+      return;
+    }
+
+    setIsSubmittingLeave(true);
+    try {
+      const payload = {
+        emplId: selectedEmployeeId || currentUser?.name || "EMP001",
+        leaveCode: selectedLeaveCode,
+        transactionType: "LEAVE",
+        transactionDate: new Date().toISOString(),
+        fiscalYear: leaveStartDate.getFullYear(),
+        hours: parseFloat(totalHoursCalculated) || 8.0,
+        remarks: leaveReason || "",
+        createdBy: currentUser?.name || "admin",
+      };
+
+      await axios.post(`${backendUrl}/api/EmployeeLeaveTransactions`, payload);
+
+      showToast("Leave applied successfully!", "success");
+      setIsApplyingLeave(false);
+      setShowLeaveModal(false);
+
+      // Optionally refresh leave balance data if needed
+      handleLeaveBalance();
+    } catch (error) {
+      const errorMsg =
+        error?.response?.data?.message || error?.message || "Unknown error";
+      showToast(`Failed to apply leave: ${errorMsg}`, "error");
+    } finally {
+      setIsSubmittingLeave(false);
+    }
+  };
   // const sortedAndFilteredRows = [...rows]
   //   .filter((row) => {
   //     // return !searchDate || row.Date === formatDate(searchDate);
@@ -1490,6 +1514,7 @@ export default function MainTable() {
         : [];
 
       setLeaveData(formattedData);
+      setLeaveTypes(formattedData);
     } catch (error) {
       showToast(`Error fetching leave balance: ${error.message}`, "error");
       setLeaveData([]);
@@ -1825,104 +1850,228 @@ export default function MainTable() {
               >
                 <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
                   <h3 className="text-base font-bold text-gray-900">
-                    Employee Leave Balances ({new Date().getFullYear()})
+                    {isApplyingLeave
+                      ? "New Leave"
+                      : `Employee Leave Balances (${new Date().getFullYear()})`}
                   </h3>
-                  <button
-                    onClick={() => setShowLeaveModal(false)}
-                    className="btn1 btn-blue !py-1 !px-3 text-xs cursor-pointer"
-                  >
-                    Close
-                  </button>
+                  <div className="flex gap-2">
+                    {!isApplyingLeave ? (
+                      <button
+                        onClick={() => setIsApplyingLeave(true)}
+                        className="btn1 btn-blue !py-1 !px-3 text-xs cursor-pointer"
+                      >
+                        Apply Leave
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsApplyingLeave(false)}
+                        className="btn1 btn-blue !py-1 !px-3 text-xs cursor-pointer bg-gray-500 hover:bg-gray-600"
+                      >
+                        View Balance
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowLeaveModal(false)}
+                      className="btn1 btn-blue !py-1 !px-3 text-xs cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
 
-                <div className="overflow-auto max-h-[60vh] border border-gray-300 rounded-lg">
-                  {leaveLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <span className="ml-2 text-xs font-medium text-gray-600">
-                        Loading leave data...
-                      </span>
-                    </div>
-                  ) : (
-                    <table className="w-full text-xs border-collapse">
-                      <thead className="sticky top-0 bg-[#e5f3fb] z-10">
-                        <tr>
-                          <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
-                            Leave Code
-                          </th>
-                          <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
-                            Beginning Balance
-                          </th>
-                          {/*  <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
-                            Leave Type Name
-                          </th>
-                          <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
-                            Carried Forward
-                          </th>
-                          <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
-                            Adjustments
-                          </th> */}
-                          <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
-                            Accrued Hours
-                          </th>
-                          <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
-                            Leave Taken
-                          </th>
-                          <th className="px-3 py-2 border-b border-gray-300 font-semibold text-black text-center">
-                            Available Balance
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {leaveData.length > 0 ? (
-                          leaveData.map((item, idx) => (
-                            <tr
-                              key={idx}
-                              className={
-                                idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                              }
-                            >
-                              <td className="px-3 py-2 text-center border-r border-b border-gray-300 font-bold text-blue-700">
-                                {item.leaveTypeCode}
-                              </td>
-                              <td className="px-3 py-2 text-center border-r border-b border-gray-300">
-                                {item.begining_hours}
-                              </td>
-                              {/* <td className="px-3 py-2 text-left border-r border-b border-gray-300 font-medium text-gray-800">
-                                {item.leaveTypeName}
-                              </td>
-                             
-                              <td className="px-3 py-2 text-center border-r border-b border-gray-300">
-                                {item.carriedForward}
-                              </td>
-                              <td className="px-3 py-2 text-center border-r border-b border-gray-300">
-                                {item.beginningAdjustments}
-                              </td> */}
-                              <td className="px-3 py-2 text-center border-r border-b border-gray-300">
-                                {item.accruedHours}
-                              </td>
-                              <td className="px-3 py-2 text-center border-r border-b border-gray-300">
-                                {item.leaveTakenHours}
-                              </td>
-                              <td className="px-3 py-2 text-center border-b border-gray-300 font-bold text-green-600 bg-green-50/40">
-                                {item.availableBalance}
+                {!isApplyingLeave ? (
+                  <div className="overflow-auto max-h-[60vh] border border-gray-300 rounded-lg">
+                    {leaveLoading ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span className="ml-2 text-xs font-medium text-gray-600">
+                          Loading leave data...
+                        </span>
+                      </div>
+                    ) : (
+                      <table className="w-full text-xs border-collapse">
+                        <thead className="sticky top-0 bg-[#e5f3fb] z-10">
+                          <tr>
+                            <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
+                              Leave Code
+                            </th>
+                            <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
+                              Beginning Balance
+                            </th>
+                            <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
+                              Accrued Hours
+                            </th>
+                            <th className="px-3 py-2 border-r border-b border-gray-300 font-semibold text-black text-center">
+                              Leave Taken
+                            </th>
+                            <th className="px-3 py-2 border-b border-gray-300 font-semibold text-black text-center">
+                              Available Balance
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {leaveData.length > 0 ? (
+                            leaveData.map((item, idx) => (
+                              <tr
+                                key={idx}
+                                className={
+                                  idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                                }
+                              >
+                                <td className="px-3 py-2 text-center border-r border-b border-gray-300 font-bold text-blue-700">
+                                  {item.leaveTypeCode}
+                                </td>
+                                <td className="px-3 py-2 text-center border-r border-b border-gray-300">
+                                  {item.begining_hours}
+                                </td>
+                                <td className="px-3 py-2 text-center border-r border-b border-gray-300">
+                                  {item.accruedHours}
+                                </td>
+                                <td className="px-3 py-2 text-center border-r border-b border-gray-300">
+                                  {item.leaveTakenHours}
+                                </td>
+                                <td className="px-3 py-2 text-center border-b border-gray-300 font-bold text-green-600 bg-green-50/40">
+                                  {item.availableBalance}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan="5"
+                                className="text-center p-8 italic text-gray-500"
+                              >
+                                No leave balance records found.
                               </td>
                             </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td
-                              colSpan="8"
-                              className="text-center p-8 italic text-gray-500"
-                            >
-                              No leave balance records found.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+                          )}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                ) : (
+                  <form onSubmit={handleApplyLeaveSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* From Date */}
+                      <div className="flex flex-col">
+                        <label className="font-semibold text-gray-700 mb-1">
+                          From <span className="text-red-500">*</span>
+                        </label>
+                        <DatePicker
+                          selected={leaveStartDate}
+                          onChange={(date) => setLeaveStartDate(date)}
+                          selectsStart
+                          startDate={leaveStartDate}
+                          endDate={leaveEndDate}
+                          placeholderText="Select start date"
+                          className="border border-gray-300 rounded px-2.5 py-1.5 text-xs w-full bg-white"
+                          dateFormat="MM/dd/yyyy"
+                          autoComplete="off"
+                        />
+                      </div>
+
+                      {/* To Date */}
+                      <div className="flex flex-col">
+                        <label className="font-semibold text-gray-700 mb-1">
+                          To <span className="text-red-500">*</span>
+                        </label>
+                        <DatePicker
+                          selected={leaveEndDate}
+                          onChange={(date) => setLeaveEndDate(date)}
+                          selectsEnd
+                          startDate={leaveStartDate}
+                          endDate={leaveEndDate}
+                          minDate={leaveStartDate}
+                          placeholderText="Select end date"
+                          className="border border-gray-300 rounded px-2.5 py-1.5 text-xs w-full bg-white"
+                          dateFormat="MM/dd/yyyy"
+                          autoComplete="off"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Leave Type */}
+                      <div className="flex flex-col">
+                        <label className="font-semibold text-gray-700 mb-1">
+                          Leave Type <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          className="border border-gray-300 rounded px-2.5 py-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          value={selectedLeaveCode}
+                          onChange={(e) => setSelectedLeaveCode(e.target.value)}
+                        >
+                          <option value="">-Select-</option>
+                          {leaveTypes.map((type, idx) => (
+                            <option key={idx} value={type.leaveTypeCode}>
+                              {type.leaveTypeCode} (Available:{" "}
+                              {type.availableBalance} hrs)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Notes / Reason */}
+                      <div className="flex flex-col row-span-2">
+                        <label className="font-semibold text-gray-700 mb-1">
+                          Notes
+                        </label>
+                        <textarea
+                          className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 h-[72px] resize-none"
+                          placeholder="Reason for leave"
+                          value={leaveReason}
+                          onChange={(e) => setLeaveReason(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 max-w-sm">
+                      {/* Daily Hours */}
+                      <div className="flex flex-col">
+                        <label className="font-semibold text-gray-700 mb-1">
+                          Daily Hours <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="border border-gray-300 rounded px-2.5 py-1.5 text-xs bg-white"
+                          value={dailyHours || 8.0}
+                          onChange={(e) => setDailyHours(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Total Hours */}
+                      <div className="flex flex-col">
+                        <label className="font-semibold text-gray-700 mb-1">
+                          Total Hours
+                        </label>
+                        <input
+                          type="text"
+                          disabled
+                          className="border border-gray-300 rounded px-2.5 py-1.5 text-xs bg-gray-100 text-gray-600"
+                          value={totalHoursCalculated || "8.00"}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">
+                      <button
+                        type="button"
+                        onClick={() => setIsApplyingLeave(false)}
+                        className="btn1 btn-blue cursor-pointer bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmittingLeave}
+                        className="btn1 btn-blue cursor-pointer disabled:opacity-50"
+                      >
+                        {isSubmittingLeave ? "Submitting..." : "Apply"}
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             </div>
           )}
