@@ -8276,6 +8276,7 @@ export default function TimesheetDetailModal({
   timesheetData,
   currentUser,
   userId,
+  scheduleId,
   role,
   onClose,
   onSave,
@@ -8378,6 +8379,7 @@ export default function TimesheetDetailModal({
   const [configHighlightColor, setConfigHighlightColor] = useState("");
   const [maxDailyHours, setMaxDailyHours] = useState(24);
   const [hardEdit, setHardEdit] = useState(false);
+  const currentYear = new Date().getFullYear();
 
   // Extract year from timesheetData.Date
   const scheduleYear = useMemo(() => {
@@ -8397,7 +8399,9 @@ export default function TimesheetDetailModal({
     const fetchSchedulePeriods = async () => {
       try {
         const response = await fetch(
-          `${backendUrl}/api/TimesheetSchedule/id/2?year=2026`,
+          api /
+            TimesheetSchedule /
+            id`${backendUrl}/api/TimesheetSchedule/id/${scheduleId}?year=${currentYear}`,
         );
         if (!response.ok) throw new Error("Failed to fetch timesheet schedule");
         const data = await response.json();
@@ -9329,6 +9333,7 @@ export default function TimesheetDetailModal({
         isHidden && (col === "PO Remaining Hours" ? isAdmin : true),
     )
     .map(([col]) => col);
+
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 md:p-6 w-full max-w-[95vw] font-inter">

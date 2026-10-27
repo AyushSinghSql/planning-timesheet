@@ -1846,7 +1846,9 @@ const Login = () => {
       userId: data.user_Id ?? data.userId,
       token: data.token,
       fullName: data.fullName,
+      ts_Sch_Id: data.ts_Sch_Id,
     };
+    
 
     localStorage.setItem("currentUser", JSON.stringify(userObj));
     window.location.href = dashboardUrl;

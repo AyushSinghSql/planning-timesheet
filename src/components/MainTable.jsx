@@ -783,6 +783,7 @@ export default function MainTable() {
   const [employeeLoading, setEmployeeLoading] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+  const [selectedScheduleId, setSelectedScheduleId] = useState(null);
 
   // Leave Application View inside Modal
   const [isApplyingLeave, setIsApplyingLeave] = useState(false);
@@ -850,12 +851,10 @@ export default function MainTable() {
 
       try {
         setEmployeeLoading(true);
-        // Fetch members for approver ID 18 (or generalize as needed)
         const userRes = await axios.get(
           `${backendUrl}/api/UserGroups/SupervisorMembers/${Id}`,
         );
 
-        // Access the 'members' array from the response body structure
         const membersData = Array.isArray(userRes.data?.members)
           ? userRes.data.members
           : [];
@@ -963,6 +962,9 @@ export default function MainTable() {
     if (userInfo) {
       try {
         setCurrentUser(JSON.parse(userInfo));
+        // if (parsed?.scheduleId) {
+        //   setSelectedScheduleId(parsed.scheduleId);
+        // }
       } catch {
         navigate("/");
       }
@@ -1721,8 +1723,10 @@ export default function MainTable() {
                       );
                       if (matchedOpt) {
                         setSelectedRole(matchedOpt.role);
+                        // setSelectedScheduleId(matchedOpt.scheduleId);
                       } else {
                         setSelectedRole("");
+                        // setSelectedScheduleId(null);
                       }
                     }}
                     disabled={employeeLoading}
@@ -2103,6 +2107,8 @@ export default function MainTable() {
                 // userId={currentUser?.userId}
                 resourceId={selectedEmployeeId || currentUser?.name} // <-- Updated here
                 userId={selectedEmployeeId || currentUser?.userId}
+                // scheduleId={selectedScheduleId || currentUser?.scheduleId}
+                scheduleId={1}
                 role={
                   selectedRole?.toLocaleLowerCase() ||
                   currentUser?.role?.toLowerCase()
@@ -2124,6 +2130,8 @@ export default function MainTable() {
                 currentUser={currentUser}
                 resourceId={selectedEmployeeId || currentUser?.name}
                 userId={selectedEmployeeId || currentUser?.name}
+                // scheduleId={selectedScheduleId || currentUser?.scheduleId}
+                scheduleId= {1}
                 role={
                   selectedRole?.toLocaleLowerCase() ||
                   currentUser?.role?.toLowerCase()

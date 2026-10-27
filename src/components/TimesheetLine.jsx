@@ -2627,6 +2627,7 @@ export default function TimesheetLine({
   onClose,
   resourceId,
   currentUser,
+  scheduleId,
   userId,
   existingTimesheetDates = [],
   timesheetToEdit = null,
@@ -2722,7 +2723,7 @@ export default function TimesheetLine({
     const fetchTimesheetSchedule = async () => {
       try {
         const response = await fetch(
-          `${backendUrl}/api/TimesheetSchedule/id/2?year=2026`,
+          `${backendUrl}/api/TimesheetSchedule/id/${scheduleId}?year=${currentYear}`,
         );
         if (!response.ok) throw new Error("Failed to fetch schedule");
         const data = await response.json();
