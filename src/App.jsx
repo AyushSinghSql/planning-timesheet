@@ -1481,6 +1481,7 @@ import ProjectUserMapping from "./components/ProjectUserMapping";
 import ApprovalEnquiry from "./components/ApprovalEnquiry";
 import LeaveProjectMapping from "./components/LeaveProjectMapping";
 import TimesheetScheduleManager from "./components/TimesheetScheduleManager";
+import ProjectPlcMapping from "./components/ProjectPlcMapping";
 
 function App() {
   const getCurrentUserContext = () => {
@@ -2356,6 +2357,16 @@ function App() {
                 // <RequirePermission screenKey="invoiceexport">
                 <div className="mt-12 ml-2">
                   <TimesheetScheduleManager />
+                </div>
+                // </RequirePermission>
+              }
+            />
+            <Route
+              path="sub-plc-mapping"
+              element={
+                // <RequirePermission screenKey="invoiceexport">
+                <div className="mt-12 ml-2">
+                  <ProjectPlcMapping />
                 </div>
                 // </RequirePermission>
               }

@@ -2198,13 +2198,13 @@ const NavigationSidebar = ({
                       onClick={handleLinkClick}
                       searchTerm={searchTerm}
                     />
-                    {/* <NavItem
+                    <NavItem
                       label="Project Leave Mapping"
                       path="/dashboard/leave-project-mapping"
                       selected={selectedPage}
                       onClick={handleLinkClick}
                       searchTerm={searchTerm}
-                    /> */}
+                    />
                     <NavItem
                       label="Manage Timesheet Schdule"
                       path="/dashboard/sub-schedule-manager"
@@ -2233,6 +2233,7 @@ const NavigationSidebar = ({
                       onClick={handleLinkClick}
                       searchTerm={searchTerm}
                     />
+                    
                     <NavItem
                       label="Settings"
                       path="/dashboard/sub-settings"
@@ -2274,6 +2275,13 @@ const NavigationSidebar = ({
 
                 {(configurationOpen || searchTerm) && isExpanded && (
                   <div className="ml-12 mr-4 space-y-1 border-l border-gray-100 pl-2">
+                    <NavItem
+                      label="Project Plc Mapping"
+                      path="/dashboard/sub-plc-mapping"
+                      selected={selectedPage}
+                      onClick={handleLinkClick}
+                      searchTerm={searchTerm}
+                    />
                     <NavItem
                       label="Configuration Settings"
                       path="/dashboard/global-configuration"
@@ -2364,6 +2372,7 @@ const NavigationSidebar = ({
                       onClick={handleLinkClick}
                       searchTerm={searchTerm}
                     /> */}
+
                     <NavItem
                       label="Manage Users"
                       path="/dashboard/manage-users"
