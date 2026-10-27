@@ -2198,6 +2198,20 @@ const NavigationSidebar = ({
                       onClick={handleLinkClick}
                       searchTerm={searchTerm}
                     />
+                    {/* <NavItem
+                      label="Project Leave Mapping"
+                      path="/dashboard/leave-project-mapping"
+                      selected={selectedPage}
+                      onClick={handleLinkClick}
+                      searchTerm={searchTerm}
+                    /> */}
+                    <NavItem
+                      label="Manage Timesheet Schdule"
+                      path="/dashboard/sub-schedule-manager"
+                      selected={selectedPage}
+                      onClick={handleLinkClick}
+                      searchTerm={searchTerm}
+                    />
                     <NavItem
                       label="Groups Management"
                       path="/dashboard/group-management"

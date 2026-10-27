@@ -859,10 +859,8 @@ export default function MainTable() {
           ? userRes.data.members
           : [];
 
-        // Filter active employees based on sEmplStatusCd === "ACT"
-        const activeMembers = membersData.filter(
-          (u) => u.ts_Schl_id?.sEmplStatusCd === "ACT",
-        );
+        // Filter active employees using the correct "isActive" boolean property
+        const activeMembers = membersData.filter((u) => u.isActive === true);
 
         setUserOptions(
           activeMembers.map((u) => ({
@@ -870,8 +868,8 @@ export default function MainTable() {
             label: `${u.fullName} (${u.username}) - ${u.groupName}`,
             role: u.role,
             userId: u.userId,
-            scheduleId: u.ts_Schl_id?.ts_Schedule_Id,
-            statusCd: u.ts_Schl_id?.sEmplStatusCd,
+            scheduleId: u.ts_Schl_id,
+            isActive: u.isActive,
           })),
         );
       } catch (e) {
